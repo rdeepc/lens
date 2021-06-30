@@ -37,6 +37,7 @@ function getBuildChannel(): string {
     case "beta":
       return "beta";
     case undefined:
+    case "latest":
       return "latest";
     default:
       return "alpha";
