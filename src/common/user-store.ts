@@ -29,9 +29,9 @@ import migrations from "../migrations/user-store";
 import { getAppVersion } from "./utils/app-version";
 import { appEventBus } from "./event-bus";
 import path from "path";
-import os from "os";
 import { fileNameMigration } from "../migrations/user-store";
 import { ObservableToggleSet, toJS } from "../renderer/utils";
+import logger from "../main/logger";
 
 export interface UserStoreModel {
   lastSeenAppVersion: string;
@@ -100,9 +100,7 @@ export class UserStore extends BaseStore<UserStoreModel> {
   /**
    * The set of file/folder paths to be synced
    */
-  syncKubeconfigEntries = observable.map<string, KubeconfigSyncValue>([
-    [path.join(os.homedir(), ".kube"), {}]
-  ]);
+  syncKubeconfigEntries = observable.map<string, KubeconfigSyncValue>();
 
   @computed get isNewVersion() {
     return semver.gt(getAppVersion(), this.lastSeenAppVersion);
@@ -175,8 +173,8 @@ export class UserStore extends BaseStore<UserStoreModel> {
   }
 
   @action
-  protected async fromStore(data: Partial<UserStoreModel> = {}) {
-    const { lastSeenAppVersion, preferences } = data;
+  protected fromStore({ lastSeenAppVersion, preferences }: Partial<UserStoreModel> = {}) {
+    logger.debug("UserStore.fromStore()", { lastSeenAppVersion, preferences });
 
     if (lastSeenAppVersion) {
       this.lastSeenAppVersion = lastSeenAppVersion;
@@ -206,6 +204,7 @@ export class UserStore extends BaseStore<UserStoreModel> {
     }
 
     if (preferences.syncKubeconfigEntries) {
+      console.log(preferences.syncKubeconfigEntries);
       this.syncKubeconfigEntries.replace(
         preferences.syncKubeconfigEntries.map(({ filePath, ...rest }) => [filePath, rest])
       );
