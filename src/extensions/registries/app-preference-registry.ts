@@ -23,7 +23,7 @@ import type React from "react";
 import { BaseRegistry } from "./base-registry";
 
 export interface AppPreferenceComponents {
-  Hint: React.ComponentType<any>;
+  Hint?: React.ComponentType<any>;
   Input: React.ComponentType<any>;
 }
 
@@ -36,13 +36,34 @@ export interface AppPreferenceRegistration {
 
 export interface RegisteredAppPreference extends AppPreferenceRegistration {
   id: string;
+  showInPreferencesTab: string;
+}
+
+export interface AppPreferenceKindRegistration {
+  id: string;
+  title: string;
+}
+
+/**
+ * These are the default preferences kinds provided by Lens
+ */
+export enum AppPreferenceKind {
+  Application = "application",
+  Proxy = "proxy",
+  Kubernetes = "kubernetes",
+  Telemetry = "telemetry",
+  Extensions = "extensions",
+  Other = "other"
 }
 
 export class AppPreferenceRegistry extends BaseRegistry<AppPreferenceRegistration, RegisteredAppPreference> {
-  getRegisteredItem(item: AppPreferenceRegistration): RegisteredAppPreference {
+  getRegisteredItem({ id, showInPreferencesTab, ...item}: AppPreferenceRegistration): RegisteredAppPreference {
     return {
-      id: item.id || item.title.toLowerCase().replace(/[^0-9a-zA-Z]+/g, "-"),
+      id: id || item.title.toLowerCase().replace(/[^0-9a-zA-Z]+/g, "-"),
+      showInPreferencesTab: showInPreferencesTab || AppPreferenceKind.Extensions,
       ...item,
     };
   }
 }
+
+export class AppPreferenceKindRegistry extends BaseRegistry<AppPreferenceKindRegistration> {}
